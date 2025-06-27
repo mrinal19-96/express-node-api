@@ -7,7 +7,11 @@ const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 
+
 dotenv.config(); // Load environment variables from .env file
+
+
+
 
 router.post("/register", async (req, res) => {
   try {

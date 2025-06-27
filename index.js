@@ -11,7 +11,7 @@ const passport = require('passport');
 const session = require('express-session');
 
 const googleAuth = require('./auth/google'); // Import Google authentication strategy
-
+const twillo = require("twilio");
 
 const app = express();
 const port = 3000;
@@ -43,6 +43,39 @@ app.use(passport.session());
 
 
 
+// twitch authentication
+const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
+const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH;
+const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER;
+
+// console.log('TWILIO_ACCOUNT_SID:', TWILIO_ACCOUNT_SID,  
+//             'TWILIO_AUTH_TOKEN:', TWILIO_AUTH_TOKEN,
+//             'TWILIO_PHONE_NUMBER:', TWILIO_PHONE_NUMBER);
+
+
+const client = new twillo(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+
+
+app.post("/send-sms", async (req, res) => {
+    const { to, message } = req.body;
+    // console.log("Sending SMS to:", to, "Message:", message);
+    
+    try {
+        const result = await client.messages.create({
+            body: message,
+            from: TWILIO_PHONE_NUMBER,
+            to: to,
+        });
+        res.status(200).json({
+            message: "SMS sent successfully",
+            sid: result.sid,
+        });
+        
+    } catch (error) {
+        console.error("Error sending SMS:", error);
+        res.status(500).json({ message: "Failed to send SMS", error: error.message });
+    }
+});
 
 
 
