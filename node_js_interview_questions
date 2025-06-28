@@ -1,0 +1,1082 @@
+Core Node.js Questions
+======================
+
+1.What is the difference between require() and import?
+
+=>1. require() – CommonJS (CJS)
+Used in Node.js (default) module system
+Synchronous — loads modules at runtime
+Works in all versions of Node.js by default
+
+2. import – ES Modules (ESM)
+Part of ECMAScript (ES6+) standard
+Asynchronous — resolved before code runs
+Needs "type": "module" in package.json, or .mjs file extension in Node.js
+
+---------------end--------------------------------
+
+
+2.What is the event loop? How does it work in Node.js?
+
+=> The event loop is the core mechanism that enables non-blocking, asynchronous execution in Node.js — even though JavaScript is single-threaded.
+It allows Node.js to handle multiple tasks concurrently (like file I/O, HTTP requests) without blocking the main thread.
+
+
+How the Event Loop Works
+-----------------------
+The event loop continually checks for tasks to execute from different queues (phases), such as:
+Timers Queue — Executes callbacks from setTimeout() and setInterval()
+Pending Callbacks — I/O callbacks deferred to the next loop
+Idle, Prepare — Internal use
+Poll Phase — Retrieves new I/O events (e.g., data from file, network)
+Check Phase — Executes setImmediate() callbacks
+Close Callbacks — e.g., socket.on('close', ...)
+Between each phase, microtasks like Promise.then() or process.nextTick() are executed.
+
+---------------------end ----------------------------
+
+
+3.Explain the concept of the call stack, event queue, and thread pool in Node.js.
+
+=> Call Stack (JavaScript Engine - Single Thread)
+The call stack is where the JavaScript engine keeps track of function calls. It operates in a Last In, First Out (LIFO) manner.
+
+🔹 How it works:
+--------------
+When you call a function, it’s pushed onto the stack.
+When the function finishes, it’s popped off.
+
+Example:
+
+function greet() {
+  console.log("Hello");
+}
+greet();
+greet() is pushed onto the call stack → runs console.log() → both are popped off.
+
+2. Event Queue (Task Queue)
+The event queue holds callback functions from async operations (like setTimeout, HTTP requests, etc.) that are ready to be executed.
+
+🔹 Role:
+Waits for the call stack to be empty.
+Then pushes ready callbacks onto the stack for execution.
+
+📌 Example:
+
+
+console.log("Start");
+
+setTimeout(() => {
+  console.log("Timeout");
+}, 0);
+
+console.log("End");
+Output:
+
+Start
+End
+Timeout
+setTimeout callback goes to the event queue → executed after stack is clear.
+
+
+3. Thread Pool (libuv - C++)
+Node.js uses libuv, a C++ library, to handle heavy or blocking tasks in the background, like:
+
+File system operations
+DNS lookups
+Some crypto operations
+It uses a pool of 4 threads (default) to process these tasks outside the main JS thread.
+
+example :
+const fs = require('fs');
+
+fs.readFile('file.txt', () => {
+  console.log('File read complete');
+});
+
+
+The file read operation goes to the thread pool, not the JS stack. Once done, the callback is pushed to the event queue, and eventually to the call stack.
+
+
+4.What are global objects in Node.js? Name a few.
+=> Global objects in Node.js are built-in objects that are available in all modules without needing to import them. They are part of Node.js’s runtime environment and provide useful functionality for developers.
+Think of them as always-accessible helpers that Node provides.
+
+Global Object	Description
+__dirname :	Absolute path of the current module's directory
+__filename:	Absolute path of the current module's file
+global:	    Global namespace object (like window in browser)
+process:	Provides information and control over the Node.js process
+Buffer:	    Used to handle binary data directly
+setTimeout():	Runs a function after a delay
+setInterval():	Runs a function repeatedly after a delay
+clearTimeout():	Clears a timeout set by setTimeout
+console:	Used to print logs (console.log, console.error)
+require():	Loads modules (CommonJS syntax)
+module:	    Represents the current module
+exports:	Exposes properties from a module
+
+
+
+5.What is the difference between synchronous and asynchronous code in Node.js?
+=>1. Synchronous Code
+Executes line by line
+Each line waits for the previous one to finish
+Blocking: the thread is stuck until the operation completes
+
+Asynchronous Code
+Executes without waiting for previous operations
+Non-blocking: tasks like file read or API calls run in the background
+Uses callbacks, promises, or async/await
+
+
+
+6.What is the difference between process.nextTick(), setImmediate(), and setTimeout()?
+=>Method	Analogy
+nextTick():	Like interrupting the current task to quickly do something else first
+setImmediate():	Like saying "run this after current I/O is fully done"
+setTimeout():	Like setting a timer: "remind me to do this in at least X milliseconds"
+
+
+
+7.What is the purpose of package.json? What are dependencies vs devDependencies?
+=>package.json is a metadata file that lives at the root of a Node.js project.
+It tells Node.js and npm:
+What your project is about
+What dependencies it needs
+What scripts you can run
+What version it is
+How to run it, build it, or test it
+
+
+
+    | Type              | `dependencies`                            | `devDependencies`                       |
+| ----------------- | ----------------------------------------- | --------------------------------------- |
+| Purpose           | Required to **run the app in production** | Needed only for **development/testing** |
+| Installed on prod | ✅ Yes                                     | ❌ No                                    |
+| Examples          | `express`, `mongoose`, `lodash`           | `jest`, `nodemon`, `eslint`, `webpack`  |
+
+
+
+8.What is the use of the Buffer class?
+=>Buffers are used to work with binary data in Node.js
+Useful for file I/O, streams, and networking
+You don’t need to import it — Buffer is a global class
+
+Let me know if you'd like to see how Buffers are used in:
+
+File upload/download APIs
+TCP server/client apps
+Image/base64 conversions
+
+
+
+9.How is Node.js different from traditional server-side platforms like PHP or Java?
+=>| Feature          | **Node.js**                     | **PHP / Java**                                    |
+| ---------------- | ------------------------------- | ------------------------------------------------- |
+| **Concurrency**  | **Non-blocking**, event-driven  | **Blocking**, multi-threaded                      |
+| **Thread Model** | Single-threaded with async I/O  | Multi-threaded (each request gets its own thread) |
+| **Scalability**  | Lightweight and highly scalable | Heavier due to per-request threads                |
+Node.js handles thousands of connections using a single thread via the event loop, whereas PHP/Java use multiple threads, which can be heavier on memory.
+
+10.How do you handle file operations in Node.js?
+=>Node.js provides a powerful built-in module called fs (short for file system) that allows you to perform file operations like read, write, update, delete, and more — both synchronously and asynchronously.
+ex: **const fs = require('fs');**
+Reading Files
+ex:**fs.readFile('file.txt', 'utf-8', (err, data) => {**
+  **if (err) return console.error(err);**
+  **console.log(data);**
+**});**
+
+
+Asynchronous Programming
+===========================
+11.Explain callbacks, promises, and async/await.
+=>JavaScript is single-threaded and executes code line-by-line. To avoid blocking (e.g., waiting for a file read or an API response), we use asynchronous programming, which lets code continue running while waiting for long operations to complete.
+**Callbacks**
+A callback is a function passed as an argument that gets executed later, often after an async operation finishes.
+
+ **Promises**
+A promise is an object that represents the eventual result (or error) of an async operation.
+
+📌 States:
+pending → not resolved yet
+fulfilled → resolved successfully
+rejected → failed with error
+
+**async/await (ES2017+)**
+async/await is syntactic sugar over Promises. It allows you to write async code like it's synchronous, using try/catch for error handling.
+
+
+12.How would you handle multiple asynchronous operations (e.g., Promise.all, Promise.race)?
+=>**Promise.all()**
+✅ Runs all promises in parallel
+Waits for all to resolve
+Fails fast: if any promise rejects, it throws an error
+
+ex : **const p1 = Promise.resolve("One");**
+**const p2 = Promise.resolve("Two");**
+
+**Promise.all([p1, p2])**
+  **.then(results => console.log(results)) // ["One", "Two"]**
+  **.catch(err => console.error(err));**
+
+  **Promise.race()**
+✅ Returns the result of the first settled promise
+Could be fulfilled or rejected
+
+| Method               | Resolves when...               | Rejects when...     | Use case                           |
+| -------------------- | ------------------------------ | ------------------- | ---------------------------------- |
+| `Promise.all`        | All promises resolve           | Any promise rejects | Wait for all, fail fast            |
+| `Promise.race`       | First settles (resolve/reject) | -                   | First wins (e.g., timeout vs API)  |
+| `Promise.allSettled` | All settle (resolve or reject) | Never rejects       | Get all results, even if some fail |
+| `Promise.any`        | First fulfills                 | All reject          | Use first successful result        |
+
+
+13.What is callback hell and how can you avoid it?
+=>Callback hell is a common issue in JavaScript and Node.js when working with asynchronous operations using nested callbacks. It leads to code that is hard to read, maintain, and debug.
+
+👎 Hard to read
+👎 Hard to test
+👎 Hard to reuse and handle errors
+
+| Technique             | Purpose                                |
+| --------------------- | -------------------------------------- |
+| **Promises**          | Replace nested callbacks with chains   |
+| **Async/Await**       | Write async code like synchronous code |
+| **Modular Functions** | Separate logic into named functions    |
+
+
+14.Explain the difference between await Promise.all() and await in a loop.
+=>The difference between await Promise.all() and await inside a loop is mainly about performance and parallelism.
+Scenario
+Let’s say you have multiple asynchronous tasks, like fetching data from several APIs or reading files.
+ **await** in a loop (Serial Execution)
+Each operation waits for the previous one to finish before starting the next.
+Slow: Operations run one after another
+Time = sum of all task durations
+
+await **Promise.all()** (Parallel Execution)
+All operations start at the same time and run in parallel. You wait for all to finish.
+Faster: All tasks run concurrently
+Time = longest single task, not total of all
+
+ Express.js & REST APIs
+========================
+
+15.What is middleware in Express.js?
+=>Middleware functions sit between request and response
+Used for auth, logging, validation, error handling, etc.
+Always call next() to pass control, unless you’re ending the response
+
+
+
+16.How do you handle error handling in Express?
+=>In Express.js, any error that occurs during the request lifecycle can be caught and processed by error-handling middleware.
+**Basic Error-Handling Middleware**
+function errorHandler(err, req, res, next) {
+  console.error(err.stack);
+  res.status(500).json({ message: 'Something went wrong' });
+}
+app.use(errorHandler);
+
+**Triggering an Error**
+app.get('/', (req, res) => {
+  throw new Error('Oops!');
+});
+app.get('/fail', (req, res, next) => {
+  const err = new Error('Something failed');
+  next(err);
+});
+**Handling Async Errors**
+When using async/await, wrap your function in a try/catch or use a helper like this:
+app.get('/async', async (req, res, next) => {
+  try {
+    const data = await someAsyncFunction();
+    res.send(data);
+  } catch (err) {
+    next(err); // Pass to error handler
+  }
+});
+**Custom Error Middleware**
+You can customize behavior for:
+
+Logging
+Dev vs production
+User-friendly messages
+
+app.use((err, req, res, next) => {
+  console.error('💥 Error:', err.message);
+  
+  res.status(err.status || 500).json({
+    error: true,
+    message: err.message || 'Internal Server Error',
+  });
+});
+
+17.How do you implement JWT authentication?
+=>JWT (JSON Web Token) authentication is a widely used method for securing APIs in Node.js + Express apps.
+npm install jsonwebtoken bcryptjs express
+User Login & Token Generation
+Middleware to Verify Token
+Protect Routes with Middleware
+
+
+18.What is the difference between PUT and PATCH in REST?
+=>| Feature        | **PUT**                         | **PATCH**                       |
+| -------------- | ------------------------------- | ------------------------------- |
+| Type of update | Full (replaces entire resource) | Partial (updates only provided) |
+| Missing fields | May be deleted from resource    | Are untouched                   |
+| Payload        | Complete object                 | Only fields to update           |
+| Idempotent     | ✅ Yes                           | ✅ Yes (but can be debated)      |
+| Use case       | Replace resource                | Modify specific fields          |
+
+
+19.How do you structure a scalable Node.js API project?
+=>
+project-root/
+│
+├── src/
+│   ├── config/          # Configuration (DB, env, constants)
+│   ├── controllers/     # Business logic
+│   ├── routes/          # Route definitions
+│   ├── models/          # Mongoose/ORM models or DB schemas
+│   ├── middlewares/     # Custom middleware (auth, error, logging)
+│   ├── services/        # External API logic or helper services
+│   ├── utils/           # Utility/helper functions
+│   ├── validations/     # Joi or Zod input validation schemas
+│   ├── app.js           # Express app setup
+│   └── server.js        # App start and port listen
+│
+├── .env                 # Environment variables
+├── .gitignore
+├── package.json
+└── README.md
+
+
+
+ Database Integration
+-====================
+20.How do you connect MongoDB/MySQL with Node.js?
+=> Connecting MongoDB with Node.js (using Mongoose)
+Connecting MySQL with Node.js (using mysql2 or Sequelize)
+Using Sequelize (ORM for MySQL/PostgreSQL/SQLite)
+| Feature     | MongoDB (Mongoose) | MySQL (mysql2)  | MySQL (Sequelize ORM) |
+| ----------- | ------------------ | --------------- | --------------------- |
+| Type        | NoSQL              | SQL             | SQL                   |
+| Query style | Mongoose methods   | SQL strings     | Model-based (ORM)     |
+| Best for    | Documents, JSON    | Relational data | Larger, complex apps  |
+
+
+
+21.How do you prevent NoSQL injection or SQL injection?
+=>Injection attacks happen when a malicious user sends crafted input that gets executed as part of a database query — leading to data leaks, unauthorized access, or data loss.
+. Preventing SQL Injection (MySQL/PostgreSQL)
+✅ Use Parameterized Queries
+NEVER concatenate user input directly into SQL queries.
+
+Preventing NoSQL Injection (MongoDB/Mongoose)
+MongoDB is vulnerable when users can inject operators like $ne, $gt, $or in JSON.
+| Practice                        | Why It Helps                      |
+| ------------------------------- | --------------------------------- |
+| ✅ Parameterized queries         | Prevent SQL injection             |
+| ✅ Input validation              | Block unexpected input types      |
+| ✅ Sanitize input (NoSQL)        | Remove dangerous operators        |
+| ✅ Use ORMs (Sequelize/Mongoose) | Auto-sanitize inputs              |
+| ✅ Limit DB permissions          | Least privilege access            |
+| ✅ Logging & rate limiting       | Monitor and slow down brute-force |
+
+| Injection Type  | Example Database  | Prevention Methods             |
+| --------------- | ----------------- | ------------------------------ |
+| SQL Injection   | MySQL, PostgreSQL | Parameterized queries, ORM     |
+| NoSQL Injection | MongoDB           | Input validation, sanitization |
+
+
+22.Difference between populate() in Mongoose and JOIN in SQL?
+
+| Feature      | `populate()` (MongoDB / Mongoose)   | `JOIN` (SQL)                         |
+| ------------ | ----------------------------------- | ------------------------------------ |
+| Used in      | MongoDB (NoSQL)                     | MySQL, PostgreSQL, etc. (SQL)        |
+| Purpose      | Pull related documents by reference | Join tables using foreign keys       |
+| Relationship | Document-based (`ObjectId`)         | Table-based (foreign keys)           |
+| Performance  | Slightly slower (separate queries)  | Generally faster (single query)      |
+| Flexibility  | Easier for nested documents         | Better for complex multi-table joins |
+
+| Scenario                         | Use                          |
+| -------------------------------- | ---------------------------- |
+| NoSQL MongoDB app                | Mongoose with `populate()`   |
+| Relational data (banking, ERP)   | SQL with `JOIN`              |
+| Nested/denormalized structure    | MongoDB (fewer joins needed) |
+| Complex multi-relational queries | SQL (better suited)          |
+
+
+23.How do you handle database connection pooling?
+=>Connection pooling means maintaining a pool (set) of open database connections that can be reused, rather than opening and closing connections for every request.
+
+✅ Why it’s important:
+⚡ Faster performance
+🧠 Reduces overhead of creating new connections
+🔐 Prevents maxing out DB connection limits
+
+ex: **mongoose.connect('mongodb://localhost:27017/mydb', {**
+  **useNewUrlParser: true,**
+  **useUnifiedTopology: true, // enables pooling**
+  **maxPoolSize: 10           // default is 5 in older versions**
+**});**
+
+| Practice                   | Why it helps                        |
+| -------------------------- | ----------------------------------- |
+| ✅ Set connection limits    | Prevents DB overload                |
+| ✅ Reuse connections        | Boosts performance                  |
+| ✅ Close pool on shutdown   | Prevents memory leaks               |
+| ✅ Use environment config   | Pool size should be tunable per env |
+| ✅ Monitor connection usage | Avoid reaching pool or DB limits    |
+
+
+| Database       | Library   | Connection Pooling Support | Configuration Needed |
+| -------------- | --------- | -------------------------- | -------------------- |
+| MongoDB        | Mongoose  | ✅ Yes (default)            | `maxPoolSize`        |
+| MySQL          | mysql2    | ✅ Yes                      | `connectionLimit`    |
+| MySQL/Postgres | Sequelize | ✅ Yes                      | `pool: { max, min }` |
+
+
+ Security & Best Practices
+=========================
+24.What are common security threats in Node.js apps? How to prevent them?
+=>Injection Attacks (SQL/NoSQL Injection)
+Problem :Malicious users inject harmful queries via input fields.
+------
+Prevention:
+---------
+Use parameterized queries (mysql2, Sequelize, Mongoose)
+Sanitize inputs (e.g., express-mongo-sanitize)
+Validate inputs using Joi, Zod, or express-validator
+
+Cross-Site Scripting (XSS)
+Problem:
+-------
+Attacker injects malicious JS into web pages viewed by users.
+Prevention:
+---------
+Escape user input before rendering (e.g., in templates)
+Use security headers (helmet sets Content-Security-Policy)
+Validate & sanitize HTML inputs
+
+Cross-Site Request Forgery (CSRF)
+Problem: Attacker tricks a user into performing unwanted actions.
+-------
+Prevention:
+----------
+Use CSRF tokens (csurf middleware)
+Use SameSite=strict or lax on cookies
+
+
+Insecure JWT Handling
+Problem:
+-------
+Tokens are intercepted, reused, or never expire.
+Prevention:
+----------
+Store JWTs in HTTP-only, secure cookies if used in browsers
+Set proper expiresIn
+Rotate secrets periodically
+Verify tokens on every request
+
+Directory Traversal
+Problem:
+-------
+Attacker accesses unauthorized files via ../ paths.
+Prevention:
+----------
+Never directly serve user-defined file paths
+Use path.join() to normalize file paths
+Validate and restrict file access paths
+
+Sanitize & validate all input
+✅ Use HTTPS
+✅ Store secrets in .env
+✅ Avoid exposing stack traces
+✅ Enable CORS securely
+✅ Use secure headers with helmet
+✅ Keep dependencies updated
+✅ Rate-limit and log access
+
+
+25.XSS, CSRF, SQL Injection
+=>| Threat | Goal                      | Common Target       | Prevention                      |
+| ------ | ------------------------- | ------------------- | ------------------------------- |
+| XSS    | Run JS in user’s browser  | Any rendered output | Sanitize output, use CSP        |
+| CSRF   | Trick browser into action | Authenticated users | CSRF tokens, SameSite cookies   |
+| SQLi   | Modify DB query logic     | Database            | Param queries, input validation |
+
+
+26.How do you use helmet and cors in Express?
+=>| Middleware | Purpose                             | Tip                      |
+| ---------- | ----------------------------------- | ------------------------ |
+| `helmet()` | Secure headers (XSS, sniffing, etc) | Use it always            |
+| `cors()`   | Enable cross-origin requests        | Restrict origins in prod |
+
+
+27.How to securely store environment variables (API keys, DB cr
+=> | Practice                     | Why it matters                          |
+| ---------------------------- | --------------------------------------- |
+| `.env` for local only        | Avoid leaks via GitHub                  |
+| Use `dotenv` early in code   | So envs are available everywhere        |
+| Set env vars per environment | Different DBs/secrets for dev/test/prod |
+| Don’t log secrets            | Sanitize logs to exclude sensitive info |
+| Use Secrets Manager in prod  | For auditing, rotation, encryption      |
+
+| What to do              | Tool or Action                      |
+| ----------------------- | ----------------------------------- |
+| Store env vars securely | Use `.env` locally, secrets in prod |
+| Prevent leaking         | Add `.env` to `.gitignore`          |
+| Access safely in code   | Use `process.env.MY_VAR`            |
+| Production storage      | Env vars or cloud secrets manager   |
+
+
+
+Performance & Optimization
+========================
+28.How do you improve the performance of a Node.js application?
+=>Use async/await or Promise instead of synchronous code.
+Reduce Unnecessary await
+// ❌ Slow - runs one after another
+await getUser();
+await getPosts();
+
+// ✅ Fast - runs in parallel
+await Promise.all([getUser(), getPosts()]);
+Database Optimization
+✅ Use Indexes
+For MongoDB: .createIndex({ field: 1 })
+
+For MySQL: CREATE INDEX
+
+✅ Optimize Queries
+Avoid large SELECT * or deep populate() in MongoDB
+
+Limit data with .select() or LIMIT
+
+✅ Use Connection Pooling
+For MongoDB: maxPoolSize
+
+For MySQL: mysql2.createPool
+
+
+
+29.Caching, clustering, load balancing
+=>| Technique          | Purpose                             | Tools / Methods              |
+| ------------------ | ----------------------------------- | ---------------------------- |
+| **Caching**        | Reduce DB load & latency            | Redis, NodeCache             |
+| **Clustering**     | Use all CPU cores (multi-process)   | `cluster`, `PM2`             |
+| **Load Balancing** | Distribute traffic across instances | Nginx, HAProxy, PM2, AWS ELB |
+
+
+30.What is clustering in Node.js? How do you use the cluster module?
+=>By default, Node.js is single-threaded, meaning it uses one CPU core — even if your machine has 4, 8, or more cores.
+
+🔄 Clustering:
+The cluster module lets you spawn multiple Node.js processes (workers) that run in parallel and share the same server port.
+📈 This helps your app handle more requests concurrently and fully utilize multi-core systems.
+
+How the Cluster Module Works:
+
+The Master process forks worker processes using cluster.fork()
+Each worker runs your server (e.g., Express app)
+The OS load balances requests between them (Node handles this internally)
+
+31.How would you handle large file uploads/downloads in Node.js?
+=>| Practice                  | Why it helps                               |
+| ------------------------- | ------------------------------------------ |
+| Use **streaming or disk** | Avoids loading file into memory            |
+| Limit file size           | Prevent DoS attacks (`limits` in `multer`) |
+| Sanitize filenames        | Avoid directory traversal                  |
+| Store files in cloud      | Use S3 or similar for scalability          |
+
+| Tip                            | Benefit                             |
+| ------------------------------ | ----------------------------------- |
+| Set timeout limits             | Prevent stalled file attacks        |
+| Use reverse proxy (e.g. NGINX) | Handles buffering & load balancing  |
+| Use Content-Disposition        | Force download behavior in browsers |
+| Monitor memory usage           | Prevent crashes from heavy loads    |
+
+| Operation | Solution                            | Tool/Method           |
+| --------- | ----------------------------------- | --------------------- |
+| Upload    | Stream with `multer` to disk        | `multer`, diskStorage |
+| Download  | Stream with `fs.createReadStream()` | `fs`, `pipe()`        |
+| Cloud     | Offload to S3 / GCS / Azure Blob    | Pre-signed URLs       |
+
+
+32.How do you debug a memory leak in Node.js?
+=>A memory leak happens when your application holds on to memory that it no longer needs, preventing it from being garbage collected. This causes the memory usage to keep growing over time.
+
+| Step            | Tool or Action                               |
+| --------------- | -------------------------------------------- |
+| Monitor memory  | `process.memoryUsage()`                      |
+| Visual debug    | Chrome DevTools with `--inspect`             |
+| Snapshot memory | `heapdump`, `clinic.js`, DevTools            |
+| Find leaks      | Look for objects that never go away          |
+| Fix issues      | Clear timers, remove listeners, limit caches |
+
+
+DevOps & Tooling
+==================
+33.What is nodemon?
+=>nodemon is a development tool for Node.js that automatically restarts your application whenever you make changes to the source code. Without nodemon, every time you change your code, you'd have to manually stop and restart the server:
+
+34.How do you create and use environment-specific configurations?
+=>project/
+├── config.js
+├── .env.development
+├── .env.production
+├── app.js
+| Step                  | Tool/Concept      | Result                          |
+| --------------------- | ----------------- | ------------------------------- |
+| Create `.env.*` files | `dotenv`          | Per-env variables               |
+| Use `NODE_ENV`        | built-in          | Detect current environment      |
+| Load correct config   | `dotenv.config()` | Loads right `.env` file         |
+| Use config file       | `config.js`       | Centralized configuration logic |
+
+
+35.What is PM2? How do you use it in production?
+=>PM2 (Process Manager 2) is a production-grade process manager for Node.js applications.
+
+It helps you:
+
+🌀 Keep your app alive forever (auto-restart on crash)
+🔄 Reload with zero downtime
+📊 Monitor CPU/memory usage
+📂 Manage multiple apps easily
+🧩 Works with clustering and log rotation
+
+| Feature              | Purpose                            |
+| -------------------- | ---------------------------------- |
+| Auto restart         | Keeps app running after crash      |
+| Process management   | Start, stop, restart multiple apps |
+| Load balancing       | Uses all CPU cores (clustering)    |
+| Log handling         | Logs stdout and errors to files    |
+| Monitoring dashboard | Realtime CPU & memory stats        |
+
+
+36.Explain how you would deploy a Node.js app on AWS or another cloud provider.
+=>Prepare Your Node.js App
+Create an EC2 Instance
+Connect via SSH
+Install Node.js on EC2
+Clone and Run Your App
+Keep It Alive with PM2 (recommended)
+Allow Public Access
+Optional: Setup Domain + SSL
+
+Package Management
+================
+37.What is the difference between npm install and npm ci?
+ What it does:
+Installs all dependencies listed in package.json.
+
+Updates the package-lock.json file if needed.
+
+If node_modules/ folder is missing, it creates one.
+
+Fast and flexible, good for development.
+
+🔁 Behavior:
+May update versions based on semver ranges.
+
+If package-lock.json is missing, it will be generated.
+
+Slower and less predictable for CI/CD environments.
+
+✅ When to use:
+During development
+
+When adding/removing packages
+
+When you're okay with potential version updates
+
+🚀 2. npm ci (CI = Continuous Integration)
+✅ What it does:
+Installs exact versions listed in package-lock.json.
+Deletes node_modules/ folder first (clean install).
+Faster and more deterministic (exact same setup every time).
+Fails if package-lock.json and package.json are out of sync.
+
+🔒 Behavior:
+Does not update package-lock.json.
+Guarantees repeatable builds.
+Optimized for automated environments (CI/CD pipelines).
+
+✅ When to use:
+In CI/CD pipelines (e.g., GitHub Actions, GitLab CI)
+In production deployments
+When you want consistent builds across machines
+
+=>| Feature                  | `npm install`            | `npm ci`                          |
+| ------------------------ | ------------------------ | --------------------------------- |
+| Use case                 | Local dev                | CI/CD & production                |
+| Deletes node\_modules?   | ❌ No                     | ✅ Yes (clean install)             |
+| Uses package-lock?       | ✅ Yes, but may update it | ✅ Yes, strict match required      |
+| Speed                    | Slower (more flexible)   | Faster (optimized for CI)         |
+| Reproducible builds      | ❌ Not guaranteed         | ✅ Guaranteed                      |
+| Installs devDependencies | ✅ Yes                    | ✅ Yes (unless `--only=prod` used) |
+
+
+38.What is a package-lock.json file?
+=>package-lock.json is a metadata file automatically generated by npm when you run npm install.
+It locks the exact version of every installed package — including nested dependencies — to ensure consistent installs across environments.
+Every developer or CI/CD pipeline will install exactly the same versions of dependencies — no surprises due to updates in third-party packages.
+
+39.How do you create and publish your own NPM package?
+=>npm publish
+| Step              | Command / Action                |
+| ----------------- | ------------------------------- |
+| Init project      | `npm init`                      |
+| Write your module | Export in `index.js`            |
+| Test locally      | `npm link`                      |
+| Add README        | For docs and npm display        |
+| Login to npm      | `npm login`                     |
+| Publish           | `npm publish`                   |
+| Update version    | `npm version patch/minor/major` |
+
+
+40.npm and yarn deffrence
+=>| Tool     | Description                                                                                               |
+| -------- | --------------------------------------------------------------------------------------------------------- |
+| **npm**  | Default package manager for Node.js                                                                       |
+| **Yarn** | Alternative by Facebook (now community maintained) with focus on speed, consistency, and offline installs |
+| Feature                    | **npm**                            | **Yarn**                                    |
+| -------------------------- | ---------------------------------- | ------------------------------------------- |
+| **Speed**                  | Slower in older versions (npm < 7) | Faster due to caching and parallel installs |
+| **Lock file**              | `package-lock.json`                | `yarn.lock`                                 |
+| **Install command**        | `npm install`                      | `yarn install`                              |
+| \*\*Autogenerated lockfile | Yes, but may change slightly       | Yes, more stable                            |
+| **Offline installs**       | Limited                            | Strong offline cache support                |
+| **Workspaces support**     | Supported (npm 7+)                 | Supported natively                          |
+| **Output verbosity**       | Verbose output                     | Cleaner, more readable output               |
+| **Security audit**         | `npm audit` (built-in)             | `yarn audit` (less complete)                |
+| **CLI commands**           | Slightly different syntax          | Simpler, often shorter commands             |
+
+
+Advanced/Scenario-Based
+===========================
+41.Design a rate limiter middleware.
+=>Allow a user (identified by IP or token) to make N requests in T seconds. If they exceed the limit, block further requests until the time resets.
+
+42.How would you handle 1 million concurrent requests in a Node.js API?
+=>Don’t block the event loop (Node.js is single-threaded!)
+Distribute load
+Optimize response time
+Use horizontal scaling
+
+Node.js + Express
+PM2 for clustering
+NGINX for load balancing
+Redis for caching
+MongoDB/Postgres with connection pooling
+AWS EC2 (Auto Scaling + Load Balancer) or Kubernetes
+CDN for assets (CloudFront or Cloudflare)
+Queue for background jobs (BullMQ + Redis)
+
+43.How do you ensure transactional integrity in a Node.js microservice with a DB?
+=>Use Database Transactions (Single Service)
+Using ORMs with Transactions
+Transactional Integrity in Microservices
+
+44.What is your approach to writing unit/integration tests in Node.js?
+=>| Purpose          | Tool                                                 |
+| ---------------- | ---------------------------------------------------- |
+| Test runner      | `Jest` / `Mocha`                                     |
+| Assertions       | `Jest` (built-in) / `Chai`                           |
+| HTTP testing     | `Supertest`                                          |
+| Code coverage    | `Jest --coverage`                                    |
+| Mocking          | `jest.mock()` / `Sinon`                              |
+| E2E API test     | `Supertest` + real server                            |
+| Database mocking | `mongodb-memory-server`, `sqlite3` (for integration) |
+
+
+Behavioral/Project Questions
+============================
+
+45.What challenges did you face in your Node.js project, and how did you solve them?
+=> Example 1: Handling High API Load / Performance Bottlenecks
+Challenge:
+In a project where we built a REST API for an eCommerce platform, the backend started slowing down during peak traffic (e.g., sales days).
+
+Root Cause:
+
+Heavy database queries
+
+Lack of caching
+
+Blocking operations in the event loop
+
+Solution:
+
+Used Redis to cache product data that didn’t change often
+
+Replaced sync code (like fs.readFileSync) with async alternatives
+
+Optimized MongoDB queries and added indexes
+
+Added load testing with k6 to simulate traffic
+
+Result:
+
+Reduced API response time by ~60%
+
+Handled 5x more concurrent requests without crashing
+
+💡 Example 2: JWT Token Misuse & Security Risk
+Challenge:
+We implemented JWT authentication but forgot to blacklist tokens after logout, leading to a security hole.
+
+Solution:
+
+Introduced token blacklist using Redis with expiration
+
+Implemented token refresh strategy
+
+Added middleware to validate tokens + check blacklist
+
+Result:
+
+Secured the app against unauthorized reuse
+
+Passed internal security audit
+
+💡 Example 3: Database Connection Leaks
+Challenge:
+In a microservice using MySQL, the app would hang or crash during high usage because connections weren’t closing.
+
+Solution:
+
+Used a connection pool (via mysql2 or sequelize)
+Audited all DB access points to ensure connections were released properly
+Monitored pool usage in production using PM2 + metrics
+
+Result:
+
+Eliminated connection errors
+Reduced DB CPU load by ~40%
+
+
+
+46.Have you worked with microservices in Node.js? How did you manage communication?
+=>Yes, I’ve worked with microservices in Node.js for a large-scale application where each service handled specific domains like authentication, payments, and product management. To manage communication between services, we used a mix of synchronous (HTTP/REST) and asynchronous (message queues like RabbitMQ) strategies depending on the use case
+
+47.Explain a real-time system you’ve built (e.g., using WebSockets or Socket.IO).
+=>“I built a real-time chat system for a customer support platform using Node.js, Socket.IO, and Redis. The goal was to enable instant 1-on-1 chat between customers and support agents, with features like message delivery status, typing indicators, and chat history.”
+
+48.How do you structure large-scale Node.js applications?
+=>Structuring a large-scale Node.js application is crucial for maintainability, scalability, and team collaboration. A good structure helps developers understand, extend, and debug the codebase efficiently — especially as the app grows.
+
+49. Localization in node js ?
+=>Multi-language websites or APIs
+Country-specific formats (date, currency)
+Language toggle for UI or notifications
+
+50. how to debug code in node js ?
+=>| Method              | Best For                      |
+| ------------------- | ----------------------------- |
+| `console.log()`     | Simple logs                   |
+| `node inspect`      | Terminal-based debugging      |
+| Chrome DevTools     | Visual step-through debugging |
+| VS Code Debugger    | Best for everyday development |
+| `nodemon --inspect` | Auto reload + debugger        |
+| `debug` module      | Controlled debug logs         |
+
+51. mongodb indexing ?
+=>An index in MongoDB is a data structure that improves the speed of queries on a collection by storing a small portion of the dataset in a way that's easy to search.
+Think of it like an index in a book — instead of reading every page, you jump directly to the right one.
+
+mprove read performance
+Avoid collection scans
+Speed up queries on large datasets
+Enable sorts and range queries
+
+
+52. $lookup 
+=> $lookup is one of the most powerful aggregation operators in MongoDB — it's used to join documents from two collections, similar to an SQL JOIN.$lookup allows you to combine documents from different collections based on a matching field.
+ex:
+db.orders.aggregate([
+  {
+    $lookup: {
+      from: "users",          // collection to join
+      localField: "userId",   // field in orders
+      foreignField: "_id",    // field in users
+      as: "userDetails"       // output field (array)
+    }
+  }
+]);
+
+
+53. what are the aggregate function in mongodb ? 
+=>Aggregation is how MongoDB processes data records and returns computed results. It’s similar to SQL's GROUP BY, SUM(), AVG() functions, etc.
+You use them in the .aggregate() method.
+
+| Stage        | Purpose                              |
+| ------------ | ------------------------------------ |
+| `$match`     | Filter documents (like `WHERE`)      |
+| `$group`     | Group by field + apply aggregate ops |
+| `$project`   | Show/hide/reshape fields             |
+| `$sort`      | Sort documents                       |
+| `$limit`     | Limit number of results              |
+| `$skip`      | Skip N results                       |
+| `$lookup`    | Join with another collection         |
+| `$unwind`    | Flatten arrays                       |
+| `$count`     | Count docs after filtering           |
+| `$addFields` | Add computed fields                  |
+
+
+54. What is an Indexing MySQL ?
+=>An index in MySQL is a data structure (usually a B-Tree) that allows the database to find rows faster without scanning the entire table.
+Think of it like the index in a book — instead of flipping through every page, you go directly to the topic's page number.
+Why Indexing Matters
+⚡ Speeds up SELECT queries
+🔍 Makes WHERE, JOIN, ORDER BY, GROUP BY faster
+📉 Reduces full table scans
+⚠️ But slightly slows down INSERT/UPDATE/DELETE (because the index needs updating)
+
+| Index Type      | Syntax                          | Use Case                             |
+| --------------- | ------------------------------- | ------------------------------------ |
+| **Primary Key** | `PRIMARY KEY (id)`              | Uniquely identifies a row            |
+| **Unique**      | `UNIQUE (email)`                | Prevents duplicates                  |
+| **Index**       | `INDEX (name)` or `KEY (name)`  | Speeds up WHERE, ORDER BY            |
+| **Composite**   | `INDEX (first_name, last_name)` | Multi-column WHERE or ORDER BY       |
+| **Fulltext**    | `FULLTEXT (description)`        | For full-text search (MyISAM/InnoDB) |
+| **Spatial**     | `SPATIAL INDEX (location)`      | For geographic coordinates (GIS)     |
+
+
+Testing in Node.js
+===================
+55.What tools do you use? (e.g., Jest, Mocha, Supertest)
+=>| Tool          | Purpose                    | When I Use It                              |
+| ------------- | -------------------------- | ------------------------------------------ |
+| **Jest**      | Unit + integration testing | My primary testing framework for Node apps |
+| **Mocha**     | Flexible test runner       | For legacy projects or custom setups       |
+| **Chai**      | Assertion library          | Often used with Mocha                      |
+| **Supertest** | HTTP endpoint testing      | For testing Express routes/controllers     |
+| **Sinon**     | Spies, stubs, mocks        | To mock dependencies or timers             |
+
+
+56.Difference between unit tests, integration tests, and E2E
+=>| Type            | Scope              | Speed    | Tools                          | Example Test           |
+| --------------- | ------------------ | -------- | ------------------------------ | ---------------------- |
+| **Unit Test**   | Single function    | ⚡ Fast   | Jest, Mocha, Vitest            | Pure logic             |
+| **Integration** | Module interaction | ⚖ Medium | Supertest, Jest, Mocha         | Route + DB interaction |
+| **E2E**         | Full user flow     | 🐢 Slow  | Cypress, Playwright, Puppeteer | UI + API + DB          |
+
+
+57.How do you mock database calls?
+=>In unit tests (you test only your code logic, not the DB)
+When you want to simulate:
+Success/failure
+Specific return values
+Errors or exceptions
+
+
+
+Monitoring & Logging
+=====================
+58.How do you log errors in Node.js?
+=> Use console.error() for Simple Cases
+ Popular logging libraries:
+| Library     | Features                                             |
+| ----------- | ---------------------------------------------------- |
+| **winston** | Most popular, customizable, log levels, file/console |
+| **pino**    | Fast, JSON-based, good for structured logs           |
+| **bunyan**  | JSON logs, good for log aggregation tools            |
+| **log4js**  | Log rotation, output filtering                       |
+
+
+59.Tools: winston, morgan, log4js
+=>| Library     | Features                                             |
+| ----------- | ---------------------------------------------------- |
+| **winston** | Most popular, customizable, log levels, file/console |
+| **pino**    | Fast, JSON-based, good for structured logs           |
+| **bunyan**  | JSON logs, good for log aggregation tools            |
+| **log4js**  | Log rotation, output filtering                       |
+
+pplication-wide logging (errors, info, debug, etc.)
+
+Logging to multiple outputs (console, file, DB, etc.)
+
+🔥 Key Features:
+Custom log levels
+
+Timestamp and formatting
+Transports: console, file, HTTP, etc.
+Support for async logging
+
+Works well with centralized log systems (Loggly, ELK, etc.)
+60.How to integrate with tools like ELK, DataDog, or Prometheus
+
+Edge Case Questions (Bonus)
+==========================
+61.How do you prevent a memory leak in a long-running app?
+=>| Cause                         | Example                              |
+| ----------------------------- | ------------------------------------ |
+| ❌ Unreleased timers/intervals | `setInterval()` not cleared          |
+| ❌ Large closures              | Variables persist longer than needed |
+| ❌ Event listeners not removed | `EventEmitter` leaks                 |
+| ❌ Global variables            | Data stays in memory forever         |
+| ❌ Caching too much data       | Manual cache grows uncontrollably    |
+| ❌ Forgotten references        | Arrays/maps holding old objects      |
+
+| Best Practice                    | Why Important                  |
+| -------------------------------- | ------------------------------ |
+| Clean up timers & intervals      | Avoid orphan processes         |
+| Unregister event listeners       | Prevent buildup in memory      |
+| Avoid global variables for state | Prevent memory retention       |
+| Limit cache size                 | Keep heap small                |
+| Monitor heap usage               | Detect leaks early             |
+| Use PM2 or clustering            | Auto-recover from memory bloat |
+
+
+62.What happens if two requests update the same record at the same time?
+=>If two requests try to update the same record at the same time, the result depends on how the database handles concurrency. Common outcomes:
+You might lose data (e.g., lose money in a banking app)
+Causes race conditions
+Can create inconsistent or corrupt data
+
+63.How do you implement graceful shutdown for Node.js apps?
+=>Stop accepting new requests
+Finish in-flight requests
+Close DB, Redis, message queues, etc.
+Exit the process cleanly without corrupting data
+
+| Resource         | Example Code                             |
+| ---------------- | ---------------------------------------- |
+| **HTTP Server**  | `server.close()`                         |
+| **MongoDB**      | `mongoose.connection.close()`            |
+| **MySQL**        | `mysqlConnection.end()`                  |
+| **Redis**        | `redisClient.quit()`                     |
+| **Sockets**      | `io.close()` (for socket.io)             |
+| **Workers**      | Stop background jobs (e.g., Bull queues) |
+| **File Streams** | `stream.end()`                           |
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
