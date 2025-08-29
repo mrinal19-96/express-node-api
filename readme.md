@@ -13,6 +13,17 @@ A simple yet flexible RESTful API built with **Node.js** and **Express**, ideal 
 - 🔒 **Authentication** using JWT + password hashing (`bcrypt`)
 - 🧩 **Logging** with `morgan`, **security** headers with `helmet`, and **rate limiting** for better hygiene
 - 📄 **API documentation**, e.g. Postman collection
+## 📌 Postman Collection
+
+You can test all API endpoints using the provided Postman collection.  
+
+- [Download Postman Collection](./postman/express-node-api.postman_collection.json)
+
+### 👉 How to Import
+1. Download the `.json` file from the link above.  
+2. Open Postman → Click **Import** → Choose the file.  
+3. Start testing the API 🚀  
+
 
 ---
 
