@@ -1,0 +1,352 @@
+{
+	"info": {
+		"_postman_id": "2054559f-b5d5-446c-adbc-75f322985f1f",
+		"name": "express-node-api",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25879773"
+	},
+	"item": [
+		{
+			"name": "auth_login",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "admin@gmail.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "123456",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "auth login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "123456",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/users/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"users",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "authentication"
+		},
+		{
+			"name": "sms-send-twillo",
+			"item": [
+				{
+					"name": "sms twillo",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODVhZGMwYTNkYzQ5NWY1NWY0YzZkYWUiLCJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNzUxMDE1NjkzLCJleHAiOjE3NTEwMTkyOTN9.Ex6cCZ5rSsGoNAJMQ9B3RgJUioEcvRynMLjoIsjG6cc",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"to\": \"+917003803008\",\r\n  \"message\": \"This is test mh\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/send-sms",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"send-sms"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Use Twillo sms send"
+		},
+		{
+			"name": "student add",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODVhZGMwYTNkYzQ5NWY1NWY0YzZkYWUiLCJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNzUwODQ1Njk5LCJleHAiOjE3NTA4NDkyOTl9.XFyMo7McYaHCuabNvhlHgoEX0IiUA0Gm4LqwQOmXHnw",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "first_name",
+							"value": "Que",
+							"type": "text"
+						},
+						{
+							"key": "last_name",
+							"value": "Rathor",
+							"type": "text"
+						},
+						{
+							"key": "email",
+							"value": "ggque@gmail.comd",
+							"type": "text"
+						},
+						{
+							"key": "phone",
+							"value": "7485963251",
+							"type": "text"
+						},
+						{
+							"key": "gender",
+							"value": "Female",
+							"type": "text"
+						},
+						{
+							"key": "profile_picture",
+							"type": "file",
+							"src": "postman-cloud:///1f050f11-6828-4bc0-b8f5-05f6b55db056"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/students/add",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"students",
+						"add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all students",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODVhZGMwYTNkYzQ5NWY1NWY0YzZkYWUiLCJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNzU1MjQ0OTkwLCJleHAiOjE3NTUyNDg1OTB9.IY_aJZ00EQKrw-STScFSARmD0lWgUBUNcRpVfWlJD-c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/students/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"students",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update students",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODVhZGMwYTNkYzQ5NWY1NWY0YzZkYWUiLCJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNzUwODQ1Njk5LCJleHAiOjE3NTA4NDkyOTl9.XFyMo7McYaHCuabNvhlHgoEX0IiUA0Gm4LqwQOmXHnw",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "profile_picture",
+							"type": "file",
+							"src": "postman-cloud:///1f051afc-1da4-4800-8e68-7272c7863f84"
+						},
+						{
+							"key": "email",
+							"value": "sq@gmail.com",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/students/update/685bca91d377b58fb5cfa497",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"students",
+						"update",
+						"685bca91d377b58fb5cfa497"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete students",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODVhZGMwYTNkYzQ5NWY1NWY0YzZkYWUiLCJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNzUwODQ1Njk5LCJleHAiOjE3NTA4NDkyOTl9.XFyMo7McYaHCuabNvhlHgoEX0IiUA0Gm4LqwQOmXHnw",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/students/delete/685bca91d377b58fb5cfa497",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"students",
+						"delete",
+						"685bca91d377b58fb5cfa497"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "edit student",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ODVhZGMwYTNkYzQ5NWY1NWY0YzZkYWUiLCJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNzUwODQ1Njk5LCJleHAiOjE3NTA4NDkyOTl9.XFyMo7McYaHCuabNvhlHgoEX0IiUA0Gm4LqwQOmXHnw",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"first_name\": \"Mrinal\",\r\n  \"last_name\": \"Halder\",\r\n  \"email\": \"test@gmail.com\",\r\n  \"phone\": \"7894561230\",\r\n  \"gender\": \"Male\",\r\n  \"profile_picture\": \"\"\r\n}\r\n"
+				},
+				"url": {
+					"raw": "http://localhost:3000/api/students/edit/685bca91d377b58fb5cfa497",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"students",
+						"edit",
+						"685bca91d377b58fb5cfa497"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
