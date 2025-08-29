@@ -9,11 +9,10 @@ A simple yet flexible RESTful API built with **Node.js** and **Express**, ideal 
 - 🔐 **.env-based configuration** using `dotenv`
 - ⚠️ Centralized **error handling** and validation (e.g. via `express-validator`)
 - 🔄 **CORS** enabled for cross-origin requests
-- 🧱 (Optional) **Database support** (e.g., MongoDB via Mongoose or MySQL via Sequelize)
-- 🔒 (Optional) **Authentication** using JWT + password hashing (`bcrypt`)
-- 🧩 (Optional) **Logging** with `morgan`, **security** headers with `helmet`, and **rate limiting** for better hygiene
-- 🧪 (Optional) **Unit & integration tests** (e.g. using Jest + Supertest)
-- 📄 (Optional) **API documentation**, e.g. Swagger UI or Postman collection
+- 🧱 **Database support** (e.g., MongoDB via Mongoose or MySQL via Sequelize)
+- 🔒 **Authentication** using JWT + password hashing (`bcrypt`)
+- 🧩 **Logging** with `morgan`, **security** headers with `helmet`, and **rate limiting** for better hygiene
+- 📄 **API documentation**, e.g. Postman collection
 
 ---
 
