@@ -61,12 +61,12 @@ Right now the endpoints are just links. Better to show them cleanly grouped by r
 ## Add Student
 
 {
-  "first_name": "John",
-  "last_name": " Doe",
-  "email": "john@test.com",
-  "phone": "7894561230",
+  "first_name": "Que",
+  "last_name": "Rathor",
+  "email": "ggque@gmail.com",
+  "phone": "7485963251",
   "gender": 'Male',
-  "profile_picture": "john.png"
+  "profile_picture": "1756494505868.png"
 }
 
 
@@ -76,9 +76,9 @@ Right now the endpoints are just links. Better to show them cleanly grouped by r
     "student": {
         "first_name": "Que",
         "last_name": "Rathor",
-        "email": "ggque@gmail.comd",
+        "email": "ggque@gmail.com",
         "phone": "7485963251",
-        "gender": "Female",
+        "gender": "Male",
         "profile_picture": "1756494505868.png",
         "_id": "68b1faa9f772994cdf3afcc3",
         "__v": 0
