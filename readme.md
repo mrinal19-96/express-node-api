@@ -65,7 +65,7 @@ Right now the endpoints are just links. Better to show them cleanly grouped by r
   "last_name": "Rathor",
   "email": "ggque@gmail.com",
   "phone": "7485963251",
-  "gender": 'Male',
+  "gender": "Male",
   "profile_picture": "1756494505868.png"
 }
 
