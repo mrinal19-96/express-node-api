@@ -13,7 +13,7 @@ const authentication = async (req, res, next) => {
         const bearer = bearerHeader.split(' ')
         const token = bearer[1];
         const user = jwt.verify(token, process.env.jwt_SECRET)
-        console.log('user', user );
+        // console.log('user', user );
         req.user = user;
 
         next(); 

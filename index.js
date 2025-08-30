@@ -105,7 +105,7 @@ app.get('/auth/google/callback', passport.authenticate('google', {
 function isAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {    
 
-        console.log('User is authenticated:', req.user);
+        // console.log('User is authenticated:', req.user);
         return next();
     } else {
         console.log('User is not authenticated');   
@@ -117,7 +117,7 @@ function isAuthenticated(req, res, next) {
 
 app.get('/mydashbord',isAuthenticated, (req, res) => {
     
-        console.log('User authenticated:', req.user);
+        // console.log('User authenticated:', req.user);
         
         res.send(`
             <h1>Welcome ${req.user.displayName}</h1>

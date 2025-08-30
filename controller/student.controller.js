@@ -30,7 +30,7 @@ function capitalize(str) {
         };
         // const students = await Student.find()
         const students = await Student.paginate({}, options);
-        console.log('Students:', students);
+        // console.log('Students:', students);
         if (!students || students.length === 0) {
             return res.status(404).json({ message: 'No students found' });
         }
@@ -127,7 +127,7 @@ let updateSudent =  async (req, res) => {
 
   try {
     const exitstudent = await Student.findById(id);
-    console.log('Existing student:', exitstudent);
+    // console.log('Existing student:', exitstudent);
 
     if (!exitstudent) {
       if (req.file && req.file.filename) {
@@ -141,7 +141,7 @@ let updateSudent =  async (req, res) => {
       return res.status(404).json({ message: 'Student not found' });
     }
 
-    // ✅ If new image uploaded, delete the old one
+    // If new image uploaded, delete the old one
     if (req.file && req.file.filename) {
       if (exitstudent.profile_picture) {
         const oldFilePath = path.join(__dirname, '../uploads', exitstudent.profile_picture);
